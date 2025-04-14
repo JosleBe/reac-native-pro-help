@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 class UserService {
@@ -109,7 +110,7 @@ class UserService {
                         Authorization: `bearer ${token}`
                     }
                 })
-                return resonse.data;
+            return resonse.data;
         } catch (error) {
             throw error
         }
@@ -130,7 +131,7 @@ class UserService {
 
     static isAdmin() {
         const role = localStorage.getItem('role')
-       
+
         return role === 'ADMIN'
     }
 
@@ -141,6 +142,11 @@ class UserService {
 
     static adminOnly() {
         return this.isAuthenticated() && this.isAdmin();
+    }
+
+    static async getToken() {
+        const token = await AsyncStorage.getItem('token')
+        return token;
     }
 
 }

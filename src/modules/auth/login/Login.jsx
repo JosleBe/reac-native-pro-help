@@ -6,6 +6,7 @@ import { useFonts, Roboto_400Regular, Roboto_500Medium, Roboto_900Black } from '
 import Logo from './img/logo-main.png'
 import UserService from '../service/AuthService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth, signInWithCustomToken } from '../../../Kernel/config/firebase-config'
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,41 +23,53 @@ const Login = ({ navigation }) => {
   });
 
   const login = async () => {
-    navigation.navigate('TabNavigator');
-    
-      /*
-  try {
+    try {
 
-    const response = await UserService.login(email, password);
-   //  console.log('Response:', response) 
-  
-  
-   Response: {"message": "User successfully logged in!", 
-   "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0d2ViQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ0NDQyMDM2LCJleHAiOjE3NDQ1Mjg0MzZ9.4BrF0C5gnbO_bST9VhGjNaZ_ctwhNqqdZIrqWcapgME", 
-   "role": "ADMIN", 
-   "statusCode": 200, 
-   "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0d2ViQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ0NDQyMDM2LCJleHAiOjE3NDQ1Mjg0MzZ9.4BrF0C5gnbO_bST9VhGjNaZ_ctwhNqqdZIrqWcapgME"}
- 
-   
-    if (response.statusCode === 200) {
-      setLoading(true);
-      setError('');
-      setToken(response.token);
-      await AsyncStorage.setItem('token', response.token);
-      navigation.navigate('TabNavigator');
-      
-    }
+      const response = await UserService.login(email, password);
+      //  console.log('Response:', response) 
+
+      {
+        /*
+           Response: {
+        "message": "User successfully logged in!",
+          "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0d2ViQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ0NDQyMDM2LCJleHAiOjE3NDQ1Mjg0MzZ9.4BrF0C5gnbO_bST9VhGjNaZ_ctwhNqqdZIrqWcapgME",
+            "role": "ADMIN",
+              "statusCode": 200,
+                "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0d2ViQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ0NDQyMDM2LCJleHAiOjE3NDQ1Mjg0MzZ9.4BrF0C5gnbO_bST9VhGjNaZ_ctwhNqqdZIrqWcapgME"
+      }
+
+        */
+      }
+
+      if (response.statusCode === 200) {
+        setLoading(true);
+        setError('');
+        if (response.token) {
+          setToken(response.token);
+          await AsyncStorage.setItem('token', response.token);
+          const firebaseTokenData = await UserService.getFirebaseToken(response.token);
+          if (firebaseTokenData.firebaseToken) {
+            await signInWithCustomToken(auth, firebaseTokenData.firebaseToken);
+            const loadProfile = await UserService.getYourProfile(response.token);
+            if (loadProfile) {
+              await AsyncStorage.setItem('profileInfo', JSON.stringify(loadProfile));
+              console.log('Profile Info:', loadProfile);
+              navigation.navigate('TabNavigator');
+            }
+          }
+
+        }
+      }
+      } catch (error) {
+        console.log(error)
+        setError('Error al iniciar sesión')
+        setLoading(false)
+
+      }
+
     }
 
-  } catch (error) {
-    console.log(error)
-    setError('Error al iniciar sesión')
-    setLoading(false)
-
-  }
-    */
-    }
-    const handleLogin = () => {
+  const handleLogin = () => {
       try {
         login();
       } catch (error) {

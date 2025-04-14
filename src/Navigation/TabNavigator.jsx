@@ -4,6 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from 'react-native-elements';
 import { View, StyleSheet } from 'react-native';
 import Colors from '../utils/Colors';
+import Chat from '../modules/chatinbox/screen/Chat';
+import Donations from '../modules/donations/screens/Donations';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,7 +29,7 @@ const TabNavigator = () => {
         name="Profile"
         component={HomeCampaign}
         options={{
-          tabBarLabel: 'Perfil',  tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+          tabBarLabel: 'Perfil',  tabBarLabelStyle: { fontSize: 9, fontWeight: 'bold' },
           tabBarIcon: ({ size, color }) => (
             <Icon name="person" type="material" color={color} size={30} />
           ),
@@ -35,9 +37,9 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Chat"
-        component={HomeCampaign}
+        component={Chat}
         options={{
-          tabBarLabel: 'Chat',  tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+          tabBarLabel: 'Chat',  tabBarLabelStyle: { fontSize: 9, fontWeight: 'bold' },
           tabBarIcon: ({ size, color }) => (
             <Icon name="chat" type="material" color={color} size={30} />
           ),
@@ -47,7 +49,7 @@ const TabNavigator = () => {
         name="HomeCampaign"
         component={HomeCampaign}
         options={{
-          tabBarLabel: 'Campañas',  tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+          tabBarLabel: 'Campañas',  tabBarLabelStyle: { fontSize: 9, fontWeight: 'bold' },
           tabBarIcon: ({ size, color }) => (
             <View style={styles.homeButton}>
               <Icon name="bullhorn" type="material-community"  color={color} size={30}/>
@@ -58,12 +60,12 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Donations"
-        component={HomeCampaign}
+        component={Donations}
         options={{
-          tabBarLabel: 'Historial',
-          tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+          tabBarLabel: 'Donaciones',
+          tabBarLabelStyle: { fontSize: 8, fontWeight: 'bold', marginTop:1 },
           tabBarIcon: ({ size, color }) => (
-            <Icon name="favorite" type="material" color={color} size={30} />
+            <Icon name="favorite" type="material" color={color} size={32} />
           ),
         }}
       />
@@ -71,7 +73,7 @@ const TabNavigator = () => {
         name="Users"
         component={HomeCampaign}
         options={{
-          tabBarLabel: 'Usuarios',  tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+          tabBarLabel: 'Usuarios',  tabBarLabelStyle: { fontSize: 9, fontWeight: 'bold' },
           tabBarIcon: ({ size, color }) => (
             <Icon name="group" type="material" color={color} size={30} />
           ),
