@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 class UserService {
-    static BASE_URL = "http://192.168.0.94:8080"
+    static BASE_URL = "http://192.168.100.184:8080"
 
     static async login(email, password) {
         try {
@@ -117,6 +117,17 @@ class UserService {
 
     }
 
+    static async getAllCampaigns() {
+        try {
+            console.log("Obteniendo Campañas...")
+            const response = await axios.get(`${this.BASE_URL}/api/campaign`);
+            console.log("Campañas", response.data)
+            return response.data.data;
+        } catch (error) {
+            console.log("Error al obtener campañas: ", error);
+            throw error;
+        }
+    }
 
     /**AUTHENTICATION CHECKER */
     static logout() {

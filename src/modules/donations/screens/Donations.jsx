@@ -107,28 +107,29 @@ const Donations = () => {
                 <Text style={styles.errorText}>{error}</Text>
             ) : (
                 <ScrollView
-                refreshControl={
-                    <RefreshControl
-                      refreshing={refreshing}
-                      onRefresh={onRefresh}
-                      colors={['#0984e3']} // Android
-                      tintColor="#0984e3"  // iOS
-                    />
-                  }>
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['#0984e3']}
+                            tintColor="#0984e3" 
+                        />
+                    }>
                     <View style={styles.rowContainer}>
                         {preDonations.map((donation, index) => (
                             <View key={index} style={styles.cardWrapper}>
                                 <ColorfulCard
-                                    title={(donation.name).slice(0, 25) + "..."}
-                                    value={`¡Quiere donar ${donation.object.articulos.reduce((acc, item) => acc + item.cantidad, 0)} artículos!`}
-                                    onPress={() => openModal(donation)}  // Abre el modal con la donación seleccionada
+                                    title={
+                                        donation.name
+                                            ? donation.name.slice(0, 25)
+                                            : "Nombre no disponible"
+                                    }
+                                    value={`¡Quiere donar ${donation.object?.articulos?.reduce((acc, item) => acc + item.cantidad, 0)} artículos!`}
+                                    onPress={() => openModal(donation)}
                                     style={styles.card}
                                     titleTextStyle={styles.titleText}
                                     valueTextStyle={styles.valueText}
                                 />
-                                <TouchableOpacity style={styles.button} onPress={() => openModal(donation)}>
-                                    <Text style={styles.buttonText}>Ver Detalles</Text>
-                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 class ChatInbox {
-    static BASE_URL = "http://192.168.0.94:8080/api"
+    static BASE_URL = "http://192.168.100.184:8080/api"
 
     static async getContacts(email) {
         try {

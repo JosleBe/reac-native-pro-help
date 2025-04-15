@@ -46,7 +46,7 @@ export default function ChatScreen() {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const res = await axios.get(`http://192.168.0.94:8080/api/${email}/contacts`);
+                const res = await axios.get(`http://192.168.100.184:8080/api/${email}/contacts`);
                 if (res.data) setContacts(res.data);
                 console.log("Contactos:", res.data);
             } catch (err) {
@@ -87,7 +87,7 @@ export default function ChatScreen() {
 
         try {
             await addDoc(collection(db, `chats/${chatId}/messages`), message);
-            await axios.post('http://192.168.0.94:8080/api/send', {
+            await axios.post('http://192.168.100.184:8080/api/send', {
                 emisorEmail: email,
                 receptorEmail: activeChat.email,
                 texto: newMessage,
@@ -111,7 +111,7 @@ export default function ChatScreen() {
         <>
             {!activeChat ? (
                 <>
-                    <Header name={"Contactos"}/>
+                    <Header name={"Contactos"} />
                     <View style={styles.container}>
                         <Input
                             placeholder="Buscar contacto..."
@@ -164,25 +164,25 @@ export default function ChatScreen() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View
-                              
+
                             >
                                 {
-  item.sender === email ? (
-    <View style={{ alignItems: 'flex-end' }}>
-      <View style={{ maxWidth: '80%', backgroundColor: '#d1e7dd', borderRadius: 10, padding: 10, marginVertical: 4 }}>
-        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Yo</Text>
-        <Text style={{ flexWrap: 'wrap' }}>{item.text}</Text>
-      </View>
-    </View>
-  ) : (
-    <View style={{ alignItems: 'flex-start' }}>
-      <View style={{ maxWidth: '80%', backgroundColor: '#f1f1f1', borderRadius: 10, padding: 10, marginVertical: 4 }}>
-        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{activeChat?.nombre || 'Contacto'}</Text>
-        <Text style={{ flexWrap: 'wrap' }}>{item.text}</Text>
-      </View>
-    </View>
-  )
-}
+                                    item.sender === email ? (
+                                        <View style={{ alignItems: 'flex-end' }}>
+                                            <View style={{ maxWidth: '80%', backgroundColor: '#d1e7dd', borderRadius: 10, padding: 10, marginVertical: 4 }}>
+                                                <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Yo</Text>
+                                                <Text style={{ flexWrap: 'wrap' }}>{item.text}</Text>
+                                            </View>
+                                        </View>
+                                    ) : (
+                                        <View style={{ alignItems: 'flex-start' }}>
+                                            <View style={{ maxWidth: '80%', backgroundColor: '#f1f1f1', borderRadius: 10, padding: 10, marginVertical: 4 }}>
+                                                <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{activeChat?.nombre || 'Contacto'}</Text>
+                                                <Text style={{ flexWrap: 'wrap' }}>{item.text}</Text>
+                                            </View>
+                                        </View>
+                                    )
+                                }
 
 
                             </View>
