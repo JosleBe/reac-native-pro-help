@@ -18,6 +18,8 @@ import Header from '../../../Kernel/components/Header'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Icon, Image, Input } from 'react-native-elements';
 import UserImage from '../img/user-img.png';
+import ChatInbox from '../services/getChat';
+import {API_URL, PORT} from '@env'
 export default function ChatScreen() {
     const [activeChat, setActiveChat] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -46,7 +48,7 @@ export default function ChatScreen() {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const res = await axios.get(`http://192.168.100.184:8080/api/${email}/contacts`);
+                const res = await axios.get(`${API_URL}:${PORT}/api/${email}/contacts`);
                 if (res.data) setContacts(res.data);
                 console.log("Contactos:", res.data);
             } catch (err) {
@@ -87,7 +89,7 @@ export default function ChatScreen() {
 
         try {
             await addDoc(collection(db, `chats/${chatId}/messages`), message);
-            await axios.post('http://192.168.100.184:8080/api/send', {
+            await axios.post(API_URL + ":" + PORT + "/api/send", {
                 emisorEmail: email,
                 receptorEmail: activeChat.email,
                 texto: newMessage,
@@ -98,9 +100,12 @@ export default function ChatScreen() {
         }
     };
 
-    const getChatId = (userEmail, otherEmail) => {
-        return [userEmail, otherEmail].sort().join('_');
-    };
+    const  getChatId = (userEmail, recipientEmail) => {
+        return userEmail < recipientEmail
+          ? `${userEmail}_to_${recipientEmail}`
+          : `${recipientEmail}_to_${userEmail}`;
+      };
+
 
     const filteredContacts = contacts.filter(contact =>
         contact.nombre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -192,7 +197,7 @@ export default function ChatScreen() {
 
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        keyboardVerticalOffset={90}
+                        keyboardVerticalOffset={100}
                         style={styles.inputContainer}
                     >
                         <TextInput

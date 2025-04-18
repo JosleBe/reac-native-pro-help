@@ -16,8 +16,10 @@ const Donations = () => {
     const [isModalVisible, setModalVisible] = useState(false);  // Estado para controlar el modal
     const [selectedDonation, setSelectedDonation] = useState(null); // Estado para almacenar la donación seleccionada
     const [selectedCampaignName, setSelectedCampaignName] = useState(null);
+
     const onRefresh = async () => {
         setRefreshing(true);
+        
         const token = await UserService.getToken();
         try {
             const data = await DonationService.getPrDonations(token);
@@ -61,7 +63,7 @@ const Donations = () => {
         }
     };
     const closeModal = () => {
-        setModalVisible(false);  // Cerramos el modal
+        setModalVisible(false); 
     };
 
     const acceptDonation = async () => {
@@ -88,7 +90,7 @@ const Donations = () => {
 
     const cancelDonation = () => {
         console.log("Donación cancelada");
-        closeModal();  // Cerrar el modal después de cancelar
+        closeModal(); 
     };
 
     return (
@@ -107,29 +109,28 @@ const Donations = () => {
                 <Text style={styles.errorText}>{error}</Text>
             ) : (
                 <ScrollView
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={['#0984e3']}
-                            tintColor="#0984e3" 
-                        />
-                    }>
+                refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                      colors={['#0984e3']} // Android
+                      tintColor="#0984e3"  // iOS
+                    />
+                  }>
                     <View style={styles.rowContainer}>
                         {preDonations.map((donation, index) => (
                             <View key={index} style={styles.cardWrapper}>
                                 <ColorfulCard
-                                    title={
-                                        donation.name
-                                            ? donation.name.slice(0, 25)
-                                            : "Nombre no disponible"
-                                    }
-                                    value={`¡Quiere donar ${donation.object?.articulos?.reduce((acc, item) => acc + item.cantidad, 0)} artículos!`}
-                                    onPress={() => openModal(donation)}
+                                    title={(donation.name).slice(0, 25) + "..."}
+                                    value={`¡Quiere donar ${donation.object.articulos.reduce((acc, item) => acc + item.cantidad, 0)} artículos!`}
+                                    onPress={() => openModal(donation)}  // Abre el modal con la donación seleccionada
                                     style={styles.card}
                                     titleTextStyle={styles.titleText}
                                     valueTextStyle={styles.valueText}
                                 />
+                                <TouchableOpacity style={styles.button} onPress={() => openModal(donation)}>
+                                    <Text style={styles.buttonText}>Ver Detalles</Text>
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>
@@ -321,6 +322,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         paddingVertical: 10,
         paddingHorizontal: 20,
+        
         borderRadius: 8,
     },
     cancelButton: {

@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import {API_URL, PORT} from '@env'
 
 class UserService {
-    static BASE_URL = "http://192.168.100.184:8080"
+    static BASE_URL = API_URL + ":" + PORT
 
     static async login(email, password) {
         try {
@@ -158,6 +159,11 @@ class UserService {
     static async getToken() {
         const token = await AsyncStorage.getItem('token')
         return token;
+    }
+
+    static async getProfileInSession() {
+        const profile = await AsyncStorage.getItem('profileInfo');
+        return JSON.parse(profile);
     }
 
 }

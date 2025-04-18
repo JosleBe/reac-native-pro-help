@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView, FlatList, StyleSheet } from 'react-native';
 import UserService from '../../auth/service/AuthService';
 import Header from '../../../Kernel/components/Header';
 import CampaignCard from '../../../Kernel/components/CampaignCard';
+import Colors from '../../../utils/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 const imagenes = {
   '/img-camp/img-1.png': require('../../../../assets/img-camp/img-1.png'),
@@ -16,7 +18,7 @@ const imagenes = {
   '/img-camp/img-9.png': require('../../../../assets/img-camp/img-9.jpg'),
 };
 
-const HomeCampaign = () => {
+const HomeCampaign = ({ navigation }) => {
   const [campañas, setCampañas] = useState([]);
   const [error, setError] = useState(null);
 
@@ -30,20 +32,17 @@ const HomeCampaign = () => {
     }
   };
 
-  useEffect(() => {
-    obtenerCampanias();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      obtenerCampanias();
+    }, [])
+  );
   let shuffledColors = [];
 let colorIndex = 0;
 
 const getUniqueColor = () => {
   const baseColors = [
-    '#4A6FA5',
-    '#3B3F58',
-    '#729B79',
-    '#D9B08C',
-    '#91684A',
+    Colors.white
   ];
 
   if (shuffledColors.length === 0 || colorIndex >= baseColors.length) {
@@ -62,7 +61,8 @@ const getUniqueColor = () => {
       <CampaignCard
         item={{ ...item, localImage: imageSource }}
         backgroundColor={getUniqueColor()}
-        onPress={() => console.log('Campaña presionada:', item.nombre)}
+        onPress={() => navigation.navigate('ViewCampaign', { campaign: item, navigation: navigation })}
+        navigation={navigation}
       />
     );
   };
