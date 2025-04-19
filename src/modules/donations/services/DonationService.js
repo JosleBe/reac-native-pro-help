@@ -4,6 +4,7 @@ class DonationService  {
     static BASE_URL = API_URL + ":" + PORT + "/api/pre-donation"
     static BASE_URL2 = API_URL + ":" + PORT + "/api/campaign"
     static BASE_URL3 = API_URL + ":" + PORT+ "/api/donations"
+    static BASE_URL4 = API_URL + ":" + PORT + "/api/beneficiaries"
 
     static async getPrDonations(token) {
         const response = await axios.get(`${this.BASE_URL}/pending`,
@@ -92,6 +93,15 @@ class DonationService  {
         });
         return response.data;
       }
-}
+
+      static async getBeneficiariesByCampaignId(campaignId, token) {
+        const response = await axios.get(`${this.BASE_URL4}/campaign/${campaignId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        return response.data;
+      }
+    }
 
 export default DonationService;

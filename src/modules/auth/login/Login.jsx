@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native'
 import Colors from '../../../utils/Colors'
 import { Button, Input, } from 'react-native-elements'
@@ -22,6 +22,9 @@ const Login = ({ navigation }) => {
     Roboto_900Black
   });
 
+  useEffect(() => {
+    UserService.logout()
+  }, [])
   const login = async () => {
     try {
 
@@ -47,6 +50,7 @@ const Login = ({ navigation }) => {
         if (response.token) {
           setToken(response.token);
           await AsyncStorage.setItem('token', response.token);
+          await AsyncStorage.setItem('role', response.role);
           const firebaseTokenData = await UserService.getFirebaseToken(response.token);
           if (firebaseTokenData.firebaseToken) {
             await signInWithCustomToken(auth, firebaseTokenData.firebaseToken);
@@ -60,162 +64,163 @@ const Login = ({ navigation }) => {
 
         }
       }
-      } catch (error) {
-        console.log(error)
-        setError('Error al iniciar sesión')
-        setLoading(false)
-
-      }
+    } catch (error) {
+      console.log(error)
+      setError('Error al iniciar sesión')
+      setLoading(false)
 
     }
+
+  }
 
   const handleLogin = () => {
-      try {
-        login();
-      } catch (error) {
-        console.log(error)
-        setError('Error al iniciar sesión')
-        setLoading(false)
-      }
+    try {
+      login();
+    } catch (error) {
+      console.log(error)
+      setError('Error al iniciar sesión')
+      setLoading(false)
     }
-
-
-
-    return (
-      <SafeAreaView style={styles.wrapper}>
-        <View style={{ width: '100%', alignItems: 'center' }}>
-          <Image source={Logo} style={{ height: 100, width: 230, borderRadius: 10, marginTop: 20 }} />
-        </View>
-        <View style={styles.container}>
-          <View style={{ width: '100%', alignItems: 'center', marginTop: 5, gap: 20 }}>
-            <Text style={styles.text}>Iniciar sesión</Text>
-            <View style={{ width: '90%', alignItems: 'center' }}>
-              <Text style={styles.label}>Correo electrónico</Text>
-              <TextInput
-                placeholderTextColor="black"
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-
-              />
-            </View>
-
-            <View style={{ width: '90%', alignItems: 'center', marginTop: 10 }}>
-              <Text style={styles.label}>Contraseña</Text>
-              <TextInput
-                placeholderTextColor="black"
-                secureTextEntry={true}
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-
-              />
-            </View>
-            <View style={{ marginTop: 30, alignItems: 'center', gap: 15 }}>
-              {/* Botón principal */}
-              <Button
-                title="Iniciar sesión"
-                titleStyle={{ fontSize: 18, color: 'white' }}
-                buttonStyle={{
-                  backgroundColor: Colors.black,
-                  width: 220,
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                }}
-                onPress={handleLogin}
-              />
-
-              {/* Botón secundario */}
-              <Button
-                title="Registrate"
-                type="outline"
-                titleStyle={{ fontSize: 18, color: Colors.black }}
-                buttonStyle={{
-                  borderColor: Colors.black,
-                  borderWidth: 2,
-                  width: 220,
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                }}
-              />
-
-              {/* Botón terciario */}
-              <Button
-                title="Ingresar como invitado"
-                type="clear"
-                titleStyle={{
-                  fontSize: 18,
-                  color: Colors.brown,
-                  textDecorationLine: 'underline',
-                }}
-                buttonStyle={{
-                  width: 220,
-                  paddingVertical: 10,
-                }}
-              />
-            </View>
-
-
-
-          </View>
-        </View>
-      </SafeAreaView>
-    )
   }
 
 
-  const styles = StyleSheet.create({
-    wrapper: {
-      backgroundColor: Colors.brown,
-      flex: 1,
 
-    },
-    text: {
-      color: Colors.black,
-      fontSize: 24,
-      fontWeight: 'semi-bold',
+  return (
+    <SafeAreaView style={styles.wrapper}>
+      <View style={{ width: '100%', alignItems: 'center' }}>
+        <Image source={Logo} style={{ height: 100, width: 230, borderRadius: 10, marginTop: 20 }} />
+      </View>
+      <View style={styles.container}>
+        <View style={{ width: '100%', alignItems: 'center', marginTop: 5, gap: 20 }}>
+          <Text style={styles.text}>Iniciar sesión</Text>
+          <View style={{ width: '90%', alignItems: 'center' }}>
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              placeholderTextColor="black"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
 
-      fontFamily: 'Roboto_900Black',
-      textAlign: 'center',
-      marginTop: 20,
+            />
+          </View>
 
-    },
-    container: {
-      backgroundColor: Colors.white,
-      height: 600,
-      borderRadius: 40,
-      marginvertical: 20,
-      margin: 5,
-      justifyContent: 'start',
-      alignItems: 'center',
-    },
-    image: {
-      height: 200,
-      width: 200,
-      borderRadius: 50,
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: Colors.black,
-      marginBottom: 5,
-      textAlign: 'left',
-      width: '100%',
-      fontFamily: 'Roboto_500Medium'
-    },
-    input: {
-      width: '100%',
-      backgroundColor: Colors.white,
-      borderColor: Colors.brown,
-      borderWidth: 2,
-      padding: 10,
-      borderRadius: 5,
-      fontSize: 18,
-      color: 'black',
-      fontFamily: 'Roboto_400Regular'
-    }
+          <View style={{ width: '90%', alignItems: 'center', marginTop: 10 }}>
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              placeholderTextColor="black"
+              secureTextEntry={true}
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+
+            />
+          </View>
+          <View style={{ marginTop: 30, alignItems: 'center', gap: 15 }}>
+            {/* Botón principal */}
+            <Button
+              title="Iniciar sesión"
+              titleStyle={{ fontSize: 18, color: 'white' }}
+              buttonStyle={{
+                backgroundColor: Colors.black,
+                width: 220,
+                borderRadius: 8,
+                paddingVertical: 12,
+              }}
+              onPress={handleLogin}
+            />
+
+            {/* Botón secundario */}
+            <Button
+              title="Registrate"
+              type="outline"
+              titleStyle={{ fontSize: 18, color: Colors.black }}
+              buttonStyle={{
+                borderColor: Colors.black,
+                borderWidth: 2,
+                width: 220,
+                borderRadius: 8,
+                paddingVertical: 12,
+              }}
+            />
+
+            {/* Botón terciario */}
+            <Button
+              title="Ingresar como invitado"
+              onPress={() => navigation.navigate('TabNavigator')}
+              type="clear"
+              titleStyle={{
+                fontSize: 18,
+                color: Colors.brown,
+                textDecorationLine: 'underline',
+              }}
+              buttonStyle={{
+                width: 220,
+                paddingVertical: 10,
+              }}
+            />
+          </View>
 
 
 
-  })
-  export default Login
+        </View>
+      </View>
+    </SafeAreaView>
+  )
+}
+
+
+const styles = StyleSheet.create({
+  wrapper: {
+    backgroundColor: Colors.brown,
+    flex: 1,
+
+  },
+  text: {
+    color: Colors.black,
+    fontSize: 24,
+    fontWeight: 'semi-bold',
+
+    fontFamily: 'Roboto_900Black',
+    textAlign: 'center',
+    marginTop: 20,
+
+  },
+  container: {
+    backgroundColor: Colors.white,
+    height: 600,
+    borderRadius: 40,
+    marginvertical: 20,
+    margin: 5,
+    justifyContent: 'start',
+    alignItems: 'center',
+  },
+  image: {
+    height: 200,
+    width: 200,
+    borderRadius: 50,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.black,
+    marginBottom: 5,
+    textAlign: 'left',
+    width: '100%',
+    fontFamily: 'Roboto_500Medium'
+  },
+  input: {
+    width: '100%',
+    backgroundColor: Colors.white,
+    borderColor: Colors.brown,
+    borderWidth: 2,
+    padding: 10,
+    borderRadius: 5,
+    fontSize: 18,
+    color: 'black',
+    fontFamily: 'Roboto_400Regular'
+  }
+
+
+
+})
+export default Login

@@ -13,6 +13,7 @@
     "@freakycoder/react-native-colorful-card": "^0.1.3",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/stack": "^7.2.10",
     "@stomp/stompjs": "^7.1.1",
@@ -32,7 +33,8 @@
     "react-native-progress": "^5.0.1",
     "react-native-toast-message": "^2.3.0",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-webview": "13.12.5"
+    "react-native-webview": "13.12.5",
+    "react-native-pager-view": "6.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

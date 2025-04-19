@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Animated, Image, SafeAreaView, ScrollView, StyleSheet, Text, View, Dimensions, Modal, Pressable } from 'react-native'
 import { Button, Icon } from 'react-native-elements';
 import Colors from '../../../utils/Colors'
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import AuthService from '../../auth/service/AuthService'
 import DonationService from '../../donations/services/DonationService';
 import * as Progress from 'react-native-progress';
@@ -10,6 +10,7 @@ import { TouchableOpacity } from 'react-native';
 import useComments from '../hooks/useComments';
 import CommentForm from '../components/CommentForm';
 import ModalDonations from '../components/ModalDonations';
+import UserService from '../../auth/service/AuthService';
 const imagenes = {
     '/img-camp/img-1.png': require('../../../../assets/img-camp/img-1.png'),
     '/img-camp/img-2.png': require('../../../../assets/img-camp/img-2.png'),
@@ -35,6 +36,10 @@ const ViewCampaign = ({ route, navigation }) => {
     const cantidad = parseInt(campaign.cantidad.replace(",", ""), 10);
     const { comments, loading } = useComments(campaign.id);
     const [modalVisibleDonationByInsumo, setModalVisibleDonationByInsumo] = useState(false);
+    const [isMapExpanded, setIsMapExpanded] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isUser, setIsUser] = useState(false);
+    
     useEffect(() => {
         Animated.loop(
             Animated.sequence([
@@ -59,6 +64,7 @@ const ViewCampaign = ({ route, navigation }) => {
         setModalVisibleDonationByInsumo(true);
     }
     useEffect(() => {
+        if (!isAuthenticated) return;
         const fetchProfile = async () => {
             const profile = await AuthService.getProfileInSession();
             setProfile(profile);
@@ -67,40 +73,57 @@ const ViewCampaign = ({ route, navigation }) => {
     }, [profile]);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         if (cantidad && !isNaN(cantidad) && cantidad > 0) {
             const newProgress = (totalDonations / cantidad) * 100;
             setProgress(Math.min(newProgress, 100));
         }
     }, [totalDonations, cantidad,]);
-
     useEffect(() => {
+        const checkAuthentication = async () => {
+            try {
+                const [isAuthenticatedResult, isUserResult] = await Promise.all([
+                    UserService.isAuthenticated(),
+                    UserService.isUser()
+                ]);
+                setIsAuthenticated(isAuthenticatedResult);
+                setIsUser(isUserResult);
+            } catch (error) {
+                console.error('Error checking authentication:', error);
+            }
+        };
+
+        checkAuthentication();
+    }, []);
+    useEffect(() => {
+        if (!isAuthenticated) return;
         let isMounted = true;
         const fetchTotalDonations = async () => {
             const token = await AuthService.getToken();
-            if (profile?.role === "guest") return;
-    
+            if (!isAuthenticated) return;
+
             try {
                 const data = await (
                     campaign.recursoTipo === "insumo"
                         ? DonationService.getDonationsbyInsumoId(campaign.id, token)
                         : DonationService.getDonationsByCampaignId(campaign.id, token)
                 );
-    
+
                 if (!isMounted) return;
-    
+
                 if (campaign.recursoTipo === "insumo") {
                     setTotalDonations(data);
                 } else {
                     const total = data.reduce((sum, donation) => sum + parseFloat(donation.amount), 0);
                     setTotalDonations(total);
                 }
-            } catch (error) {}
+            } catch (error) { }
         };
-    
+
         fetchTotalDonations();
         return () => { isMounted = false; };
     }, [campaign?.id, campaign?.recursoTipo, profile?.role]);
-    
+
 
     const getDay = (dateString) => {
         const date = new Date(dateString);
@@ -115,8 +138,8 @@ const ViewCampaign = ({ route, navigation }) => {
     const closeAllModals = () => {
         setModalVisibleDonation(false);
         setModalVisibleDonationByInsumo(false);
-      };
-      
+    };
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.header}>
@@ -130,7 +153,24 @@ const ViewCampaign = ({ route, navigation }) => {
                     <View style={styles.content}>
                         <Image source={imageSource} style={styles.image} />
                         <View style={styles.containerMap}>
-                            <MapView style={styles.map} />
+                            <TouchableOpacity onPress={() => setIsMapExpanded(true)}>
+                                <MapView style={styles.map}
+                                    region={{
+                                        latitude: campaign.location.coordinates.lat,
+                                        longitude: campaign.location.coordinates.lng,
+                                        latitudeDelta: 0.01,
+                                        longitudeDelta: 0.01,
+                                    }}
+                                >
+                                    <Marker
+                                        coordinate={{ latitude: campaign.location.coordinates.lat, longitude: campaign.location.coordinates.lng }}
+                                        title="Ubicación de la campaña"
+                                        pinColor="red"
+                                    />
+                                </MapView>
+                            </TouchableOpacity>
+
+
                         </View>
                     </View>
 
@@ -199,21 +239,40 @@ const ViewCampaign = ({ route, navigation }) => {
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <View style={styles.buttonItem}>
-                            <Button
-                                containerStyle={styles.buttonItemContainer}
-                                buttonStyle={styles.primaryButton}
-                                titleStyle={{ fontWeight: '700', color: '#efb810', fontSize: 16 }}
-                                title="Hacer una donación"
-                                onPress={() => campaign.recursoTipo === "insumo" ? openModalDonationByInsumo() : openModalDonation()}
-                            />
-                            <Button
-                                containerStyle={styles.buttonItemContainer}
-                                buttonStyle={styles.primaryButton}
-                                titleStyle={{ color: Colors.white, fontWeight: '700', fontSize: 16 }}
-                                title="Inscribirme"
-                            />
-                        </View>
+
+                        {
+                            isAuthenticated ? (
+                                isUser && (
+                                    <View style={styles.buttonItem}>
+                                        <Button
+                                            containerStyle={styles.buttonItemContainer}
+                                            buttonStyle={styles.primaryButton}
+                                            titleStyle={{ fontWeight: '700', color: '#efb810', fontSize: 16 }}
+                                            title="Hacer una donación"
+                                            onPress={() => campaign.recursoTipo === "insumo" ? openModalDonationByInsumo() : openModalDonation()}
+                                        />
+                                        <Button
+                                            containerStyle={styles.buttonItemContainer}
+                                            buttonStyle={styles.primaryButton}
+                                            titleStyle={{ color: Colors.white, fontWeight: '700', fontSize: 16 }}
+                                            title="Inscribirme"
+                                        />
+
+                                    </View>
+
+
+                                )
+                            ) : (
+
+                                <View style={{ width: '60%', alignItems: 'center', backgroundColor: 'black', padding: 10, borderRadius: 10 }}>
+                                    <Text style={{ fontSize: 14, fontWeight: 'bold', color: Colors.white, textAlign: 'center',color:'#efb810' }}>¡Inicia sesión para realizar una donación
+                                        o inscribirte en la campaña!
+                                    </Text>
+                                </View>
+                            )
+                        }
+
+
                         <View style={styles.buttonItemComment}>
                             <TouchableOpacity onPress={() => setModalVisible(true)} style={{ alignItems: "center" }} >
                                 <Animated.View style={[styles.floatingButton, { transform: [{ translateY: floatAnim }] }]}>
@@ -228,18 +287,18 @@ const ViewCampaign = ({ route, navigation }) => {
                 </View>
                 {
                     // Modal de donaciones COMOPONENT -> ModalDonations
-                 
+
                     <ModalDonations
-                      modalVisible={modaVisibleDonation || modalVisibleDonationByInsumo} 
-                      setModalVisible={closeAllModals}
-                       campaignid={campaign.id}
-                       userid={profile?.user?.id}
-                       email={profile?.user?.email}
-                       phone={profile?.user?.phone}
-                       name={profile?.user?.name}
-                       recursoTipo={campaign.recursoTipo}
-                       articulo={campaign.objeto}
-                         />
+                        modalVisible={modaVisibleDonation || modalVisibleDonationByInsumo}
+                        setModalVisible={closeAllModals}
+                        campaignid={campaign.id}
+                        userid={profile?.user?.id}
+                        email={profile?.user?.email}
+                        phone={profile?.user?.phone}
+                        name={profile?.user?.name}
+                        recursoTipo={campaign.recursoTipo}
+                        articulo={campaign.objeto}
+                    />
                 }
                 {
                     //Modal de comentarios
@@ -288,17 +347,57 @@ const ViewCampaign = ({ route, navigation }) => {
                                 ))}
 
                             </ScrollView>
-                          
+
                         </View>
                     </View>
                     <CommentForm campaignId={campaign.id} />
                 </Modal>
             </ScrollView>
+            <Modal visible={isMapExpanded} animationType="slide">
+                <View style={styles.expandedMapContainer}>
+                    <MapView
+                        style={styles.expandedMap}
+                        region={{
+                            latitude: campaign.location.coordinates.lat,
+                            longitude: campaign.location.coordinates.lng,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                    >
+                        <Marker
+                            coordinate={{ latitude: campaign.location.coordinates.lat, longitude: campaign.location.coordinates.lng }}
+                            title="Ubicación de la campaña"
+                            pinColor="red"
+                        />
+                    </MapView>
+                    <TouchableOpacity onPress={() => setIsMapExpanded(false)} style={styles.closeBtn}>
+                        <Text style={styles.closeText}>Cerrar</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    expandedMapContainer: {
+        flex: 1,
+    },
+    expandedMap: {
+        flex: 1,
+    },
+    closeBtn: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        padding: 10,
+        borderRadius: 10,
+    },
+    closeText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
     scrollContent: {
         paddingBottom: 40,
     },
@@ -363,7 +462,8 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     dateContainer: {
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
+
 
     },
     dateItem: {
@@ -385,7 +485,11 @@ const styles = StyleSheet.create({
     },
     dateItemTextMonth: {
         padding: 5,
-        borderRadius: 5,
+
+        borderEndEndRadius: 5,
+        borderStartEndRadius: 5,
+        borderTopRightRadius: 5,
+        borderBottomLeftRadius: 5,
     },
     monthText: {
         fontSize: 12,

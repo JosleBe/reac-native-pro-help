@@ -17,6 +17,7 @@ import {
 import { Ionicons, Feather } from '@expo/vector-icons';
 import AuthService from '../../../modules/auth/service/AuthService';
 import CampaignService from '../../../modules/homeCampaign/service/CampaignService';
+import UserService from '../../../modules/auth/service/AuthService';
 
 const CommentForm = ({ campaignId }) => {
     const [texto, setTexto] = useState('');
@@ -26,20 +27,40 @@ const CommentForm = ({ campaignId }) => {
     const [newMessage, setNewMessage] = useState('');
     const [admins, setAdmins] = useState([]);
     const [profile, setProfile] = useState({});
-
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     useEffect(() => {
+        const checkAuth = async () => {
+            const auth = await UserService.isAdmin();
+            setIsAdmin(auth);
+        };
+        checkAuth();
+    }, []);
+    useEffect(() => {
+        if (!isAuthenticated) return;
         const fetchProfile = async () => {
             const user = await AuthService.getProfileInSession();
-            setProfile(user);
+            setProfile(user.user);
+
         };
         fetchProfile();
+    }, [campaignId]);
+    useEffect(() => {
+        const checkAuth = async () => {
+            const auth = await UserService.isAuthenticated();
+            setIsAuthenticated(auth);
+        };
+
+        checkAuth();
     }, []);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         const fetchAdmins = async () => {
             if (profile?.role === 'guest') return;
             const token = await AuthService.getToken();
             const data = await AuthService.getAllAdmins(token);
+            console.log(data);
             setAdmins(data);
         };
 
@@ -61,7 +82,7 @@ const CommentForm = ({ campaignId }) => {
     };
 
     const handleSubmit = async () => {
-        if (profile.role === 'guest') {
+        if (!isAuthenticated) {
             Alert.alert("Error", "Inicia sesión para enviar un comentario.");
             return;
         }
@@ -70,6 +91,10 @@ const CommentForm = ({ campaignId }) => {
     };
 
     const handlePrivateMessage = async () => {
+        if (!isAuthenticated) {
+            Alert.alert("Error", "Inicia sesión para enviar un mensaje privado.");
+            return;
+        }
         try {
             Alert.alert("Enviando...", "Procesando mensaje privado...");
             await CampaignService.handlePrivate(
@@ -91,7 +116,6 @@ const CommentForm = ({ campaignId }) => {
         <View style={styles.container}>
             <View style={styles.inputContainer}>
 
-                {/* Cerrar teclado al hacer click fuera del input */}
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -112,11 +136,11 @@ const CommentForm = ({ campaignId }) => {
                     </KeyboardAvoidingView>
                 </TouchableWithoutFeedback>
 
-                {profile?.role !== 'guest' && (
-                    <TouchableOpacity onPress={() => setShowModal(true)}>
-                        <Feather name="lock" size={22} color="gray" />
-                    </TouchableOpacity>
-                )}
+                {isAuthenticated === false || isAdmin ? (
+                    <></>
+                ) : (<TouchableOpacity onPress={() => setShowModal(true)}>
+                    <Feather name="lock" size={22} color="gray" />
+                </TouchableOpacity>)}
 
                 <TouchableOpacity onPress={handleSubmit} disabled={uploading || !texto.trim()}>
                     <Ionicons name="send" size={22} color={texto.trim() ? "#007BFF" : "gray"} />
@@ -176,7 +200,7 @@ const styles = StyleSheet.create({
         color: 'black',
         paddingHorizontal: 10,
         maxHeight: 100,
-        minHeight: 40, 
+        minHeight: 40,
     },
     previewImage: {
         marginTop: 10,

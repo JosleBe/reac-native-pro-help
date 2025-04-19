@@ -1,15 +1,43 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import LocationModal from './LocationModal';
 import { Icon, Image } from 'react-native-elements';
 import Colors from '../../utils/Colors';
+import CampaignService from '../../modules/homeCampaign/service/CampaignService';
+import UserService from '../../modules/auth/service/AuthService';
 
 const CampaignCard = ({ item, backgroundColor, onPress, navigation }) => {
     const [showModal, setShowModal] = useState(false);
-
+    const [isDisabled, setIsDisabled] = useState(item.estado);
+    const [isAdmin, setIsAdmin] = useState(false);
+    useEffect(() => {
+        const checkAuth = async () => {
+          const auth = await UserService.isAdmin();
+          setIsAdmin(auth);
+        };
+        checkAuth();
+      }, []);
     const location = {
         latitude: item?.location?.coordinates?.lat || 18.8503443,
         longitude: item?.location?.coordinates?.lng || -99.2007355,
+    };
+
+    const changeStatusCampaign = async () => {
+        const response = await CampaignService.changeStatusCampaign(item.id, isDisabled);
+        if (response.status === 'success') {
+            setIsDisabled(!isDisabled);
+            Alert.alert('Campaña actualizada', `La campaña ha sido ${isDisabled ? 'deshabilitada' : 'habilitada'} correctamente`);
+        }
+    }
+    const handleDisableCampaign = () => {
+        Alert.alert('Cambiar estado de campaña', `¿Estás seguro de querer ${isDisabled ? 'deshabilitar' : 'habilitar'} esta campaña?`, [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+                text: 'Cambiar estado', onPress: () => {
+                    changeStatusCampaign();
+                }
+            },
+        ]);
     };
 
     return (
@@ -41,23 +69,28 @@ const CampaignCard = ({ item, backgroundColor, onPress, navigation }) => {
                     </View>
                     <Image source={item.localImage} style={styles.image} />
                     <View style={styles.footerRow}>
-                        <TouchableOpacity onPress={() => setShowModal(true)} style={styles.locationBtn}>
-                            <Icon name="location-on" type="material" size={18} color="red" style={{ marginRight: 4 }} />
+                        <TouchableOpacity onPress={() => setShowModal(true)} style={[styles.locationBtn, { marginTop: isAdmin ? 0 : 10 }]}>
+                            <Icon name="location-on" type="material" size={18} color="red" style={{ marginRight: 4 }}  />
                             <Text style={styles.footerAction}>Ver ubicación</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <View style={styles.actionContainer}>
-                        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('ViewCampaign', { campaign: item, navigation: navigation })}>
-                            <Text style={styles.actionText}>Ver campaña</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionBtn}>
-                            <Text style={styles.actionText}>Historial</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionBtn}>
-                            <Text style={styles.actionText}>Deshabilitar</Text>
-                        </TouchableOpacity>
-                    </View>
+                    {
+                        isAdmin && (
+                            <View style={styles.actionContainer}>
+                                <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('ViewCampaign', { campaign: item, navigation: navigation })}>
+                                    <Text style={styles.actionText}>Ver campaña</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate("RecordCampaign", { campaign: item, navigation: navigation })}>
+                                    <Text style={styles.actionText}>Historial</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.actionBtn} onPress={handleDisableCampaign}>
+                                    <Text style={styles.actionText}>{isDisabled ? 'Deshabilitar' : 'Habilitar'}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )
+                    }
+
 
 
 
@@ -187,6 +220,7 @@ const styles = StyleSheet.create({
     locationBtn: {
         flexDirection: 'row',
         alignItems: 'center',
+        
     },
 
     footerAction: {

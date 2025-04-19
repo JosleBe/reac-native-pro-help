@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { API_URL, PORT } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from '../../../Kernel/config/firebase-config';
 
 const BASE_URL = `${API_URL}:${PORT}/api`;
 
@@ -113,6 +114,19 @@ const AdminService = {
     return userEmail < recipientEmail
       ? `${userEmail}_to_${recipientEmail}`
       : `${recipientEmail}_to_${userEmail}`;
+  },
+
+  changeStatusCampaign: async (campaignId, status) => {
+    const token = await AsyncStorage.getItem('token');
+    const response = await axios.patch(`${BASE_URL}/campaign/${campaignId}/status/${!status}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+   if (response.status === 200) {
+    return {status: 'success'};
+  }
+  return {status: 'error'};
   },
 };
 

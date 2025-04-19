@@ -7,6 +7,7 @@ import DonationService from '../services/DonationService';
 import { RefreshControl, } from 'react-native';
 
 import { Icon, Input } from 'react-native-elements';
+import Colors from '../../../utils/Colors';
 
 const Donations = () => {
     const [preDonations, setPreDonations] = useState([]);
@@ -199,6 +200,7 @@ const Donations = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'white',
     },
     rowContainer: {
         flexDirection: 'row',

@@ -132,23 +132,24 @@ class UserService {
 
     /**AUTHENTICATION CHECKER */
     static logout() {
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
+        AsyncStorage.removeItem('token')
+        AsyncStorage.removeItem('profileInfo')
+        AsyncStorage.removeItem('role')
     }
 
-    static isAuthenticated() {
-        const token = localStorage.getItem('token')
-        return !!token
+    static async isAuthenticated() {
+        const token = await AsyncStorage.getItem('token')
+        
+        return token == null ? false : true
     }
 
-    static isAdmin() {
-        const role = localStorage.getItem('role')
-
+    static async isAdmin() {
+        const role = await AsyncStorage.getItem('role')
         return role === 'ADMIN'
     }
 
-    static isUser() {
-        const role = localStorage.getItem('role')
+    static async isUser() {
+        const role = await AsyncStorage.getItem('role')
         return role === 'USER'
     }
 

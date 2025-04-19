@@ -4,9 +4,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL, PORT } from '@env';
 
 const useComments = (campaignId) => {
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const checkAuth = async () => {
+      const auth = await UserService.isAuthenticated();
+      setIsAuthenticated(auth);
+    };
+    checkAuth();
+  }, []);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(false);
   const fetchComments = async () => {
+    if (!isAuthenticated) return;
     try {
       const token = await AsyncStorage.getItem("token");
       setLoading(true);
@@ -24,6 +34,7 @@ const useComments = (campaignId) => {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     if (!campaignId) return;
     fetchComments();
     const interval = setInterval(() => {

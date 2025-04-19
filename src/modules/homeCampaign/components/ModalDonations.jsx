@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { Button, Icon, Input } from 'react-native-elements'
 import Colors from '../../../utils/Colors';
@@ -17,8 +17,19 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
     const [amount, setAmount] = useState('');
     const [selectedArticulos, setSelectedArticulos] = useState({});
     const [articulos, setArticulos] = useState(articulo?.articulos);
-   
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+          const auth = await UserService.isAuthenticated();
+          setIsAuthenticated(auth);
+        };
+    
+        checkAuth();
+      }, []);
+
     const handleDonate = async () => {
+        if (!isAuthenticated) return;
         if (recursoTipo === "insumo") {
             const donaciones = Object.entries(selectedArticulos)
                 .filter(([_, cantidad]) => cantidad > 0)
