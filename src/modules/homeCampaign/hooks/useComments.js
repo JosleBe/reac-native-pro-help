@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_URL, PORT } from '@env';
+import { API_URL } from '@env';
+import UserService from "../../auth/service/AuthService";
 
 const useComments = (campaignId) => {
-
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   useEffect(() => {
     const checkAuth = async () => {
       const auth = await UserService.isAuthenticated();
@@ -13,14 +16,13 @@ const useComments = (campaignId) => {
     };
     checkAuth();
   }, []);
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(false);
+
   const fetchComments = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !campaignId) return;
     try {
       const token = await AsyncStorage.getItem("token");
       setLoading(true);
-      const response = await axios.get(`${API_URL}:${PORT}/api/campaign/${campaignId}/comments`, {
+      const response = await axios.get(`${API_URL}/api/campaign/${campaignId}/comments`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -34,17 +36,19 @@ const useComments = (campaignId) => {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    if (!campaignId) return;
-    fetchComments();
-    const interval = setInterval(() => {
-      fetchComments();
-    }, 10000); 
-
+    if (!isAuthenticated || !campaignId) return;
+    const interval = setInterval(fetchComments, 10000);
     return () => clearInterval(interval);
-  }, [campaignId]);
+  }, [campaignId, isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && campaignId) {
+      fetchComments();
+    }
+  }, [isAuthenticated]);
 
   return { comments, loading };
 };
+
 
 export default useComments;

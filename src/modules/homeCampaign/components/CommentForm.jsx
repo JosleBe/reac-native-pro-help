@@ -7,7 +7,6 @@ import {
     Modal,
     StyleSheet,
     Image,
-    Alert,
     ScrollView,
     KeyboardAvoidingView,
     Platform,
@@ -18,6 +17,7 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import AuthService from '../../../modules/auth/service/AuthService';
 import CampaignService from '../../../modules/homeCampaign/service/CampaignService';
 import UserService from '../../../modules/auth/service/AuthService';
+import CustomAlert from '../../profile/screens/CustomAlert'; 
 
 const CommentForm = ({ campaignId }) => {
     const [texto, setTexto] = useState('');
@@ -29,6 +29,20 @@ const CommentForm = ({ campaignId }) => {
     const [profile, setProfile] = useState({});
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    
+    // Estados para el CustomAlert
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertContent, setAlertContent] = useState({
+        title: '',
+        message: '',
+        type: 'info'
+    });
+
+    const showAlert = (title, message, type = 'info') => {
+        setAlertContent({ title, message, type });
+        setAlertVisible(true);
+    };
+
     useEffect(() => {
         const checkAuth = async () => {
             const auth = await UserService.isAdmin();
@@ -36,21 +50,21 @@ const CommentForm = ({ campaignId }) => {
         };
         checkAuth();
     }, []);
+
     useEffect(() => {
         if (!isAuthenticated) return;
         const fetchProfile = async () => {
             const user = await AuthService.getProfileInSession();
             setProfile(user.user);
-
         };
         fetchProfile();
     }, [campaignId]);
+
     useEffect(() => {
         const checkAuth = async () => {
             const auth = await UserService.isAuthenticated();
             setIsAuthenticated(auth);
         };
-
         checkAuth();
     }, []);
 
@@ -83,20 +97,20 @@ const CommentForm = ({ campaignId }) => {
 
     const handleSubmit = async () => {
         if (!isAuthenticated) {
-            Alert.alert("Error", "Inicia sesión para enviar un comentario.");
+            showAlert("Error", "Inicia sesión para enviar un comentario.", "error");
             return;
         }
         await CampaignService.handleSubmit(texto, image, campaignId, setTexto, setImage);
-        Alert.alert("Éxito", "Comentario enviado");
+        showAlert("Éxito", "Comentario enviado", "success");
     };
 
     const handlePrivateMessage = async () => {
         if (!isAuthenticated) {
-            Alert.alert("Error", "Inicia sesión para enviar un mensaje privado.");
+            showAlert("Error", "Inicia sesión para enviar un mensaje privado.", "error");
             return;
         }
         try {
-            Alert.alert("Enviando...", "Procesando mensaje privado...");
+            showAlert("Enviando...", "Procesando mensaje privado...", "info");
             await CampaignService.handlePrivate(
                 newMessage,
                 profile.email,
@@ -105,17 +119,16 @@ const CommentForm = ({ campaignId }) => {
                 setNewMessage,
                 setShowModal
             );
-            Alert.alert("Éxito", "Mensaje privado enviado");
+            showAlert("Éxito", "Mensaje privado enviado", "success");
         } catch (error) {
             console.error(error);
-            Alert.alert("Error", "Hubo un problema al enviar el mensaje privado.");
+            showAlert("Error", "Hubo un problema al enviar el mensaje privado.", "error");
         }
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.inputContainer}>
-
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -138,9 +151,11 @@ const CommentForm = ({ campaignId }) => {
 
                 {isAuthenticated === false || isAdmin ? (
                     <></>
-                ) : (<TouchableOpacity onPress={() => setShowModal(true)}>
-                    <Feather name="lock" size={22} color="gray" />
-                </TouchableOpacity>)}
+                ) : (
+                    <TouchableOpacity onPress={() => setShowModal(true)}>
+                        <Feather name="lock" size={22} color="gray" />
+                    </TouchableOpacity>
+                )}
 
                 <TouchableOpacity onPress={handleSubmit} disabled={uploading || !texto.trim()}>
                     <Ionicons name="send" size={22} color={texto.trim() ? "#007BFF" : "gray"} />
@@ -173,6 +188,15 @@ const CommentForm = ({ campaignId }) => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={alertVisible}
+                onClose={() => setAlertVisible(false)}
+                title={alertContent.title}
+                message={alertContent.message}
+                type={alertContent.type}
+            />
         </View>
     );
 };
@@ -181,9 +205,10 @@ export default CommentForm;
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 7,
+        height: 85,
         paddingHorizontal: 16,
-        flex: 1,  // Aseguramos que el contenedor principal ocupe el espacio necesario
+        backgroundColor: "gray",
+        justifyContent: "flex-end",
     },
     inputContainer: {
         flexDirection: 'row',
@@ -193,6 +218,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 2,
         gap: 10,
+        marginBottom: 15
     },
     textInput: {
         flex: 1,

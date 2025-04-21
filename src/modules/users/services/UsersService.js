@@ -1,8 +1,8 @@
-import { API_URL, PORT } from '@env';
+import { API_URL } from '@env';
 import axios from 'axios';
-const BASE_URL = `${API_URL}:${PORT}/api/donations`;
-const BASE_URL_ADMINUSER = `${API_URL}:${PORT}/api/adminuser`;
-const BASE_URL_ADMIN = `${API_URL}:${PORT}/api/admin`;
+const BASE_URL = `${API_URL}/api/donations`;
+const BASE_URL_ADMINUSER = `${API_URL}/api/adminuser`;
+const BASE_URL_ADMIN = `${API_URL}/api/admin`;
 const UsersService = {
 
 
@@ -15,31 +15,31 @@ const UsersService = {
                         Authorization: `Bearer ${token}`
                     }
                 })
-            return response.data.length; 
+            return response.data.length;
         } catch (error) {
             console.error('Error al obtener las donaciones', error);
-            return 0; 
+            return 0;
         }
     },
 
     getUserAllUsers: async (token, loggedInUserId) => {
-        try{ 
+        try {
             const response = await axios.get(`${BASE_URL_ADMINUSER}/get-all-users`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 })
-                const activeUsers = response.data.userEntityList.filter(user => user.active && user.email !== loggedInUserId);
-                
-                return activeUsers;
-        }catch{
+            const activeUsers = response.data.userEntityList.filter(user => user.active && user.email !== loggedInUserId);
+
+            return activeUsers;
+        } catch {
             console.error('Error al obtener los usuarios', error);
         }
     },
     disableUser: async (token, userId) => {
         try {
-            const response = await axios.patch(`${BASE_URL_ADMIN}/disable-user/${userId}`,{},
+            const response = await axios.patch(`${BASE_URL_ADMIN}/disable-user/${userId}`, {},
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

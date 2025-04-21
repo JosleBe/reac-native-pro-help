@@ -20,7 +20,7 @@ const Donations = () => {
 
     const onRefresh = async () => {
         setRefreshing(true);
-        
+
         const token = await UserService.getToken();
         try {
             const data = await DonationService.getPrDonations(token);
@@ -32,13 +32,19 @@ const Donations = () => {
         }
     };
     useEffect(() => {
+        console.log("useEffect se está ejecutando");
+
         const getData = async () => {
             setLoading(true);
             const token = await UserService.getToken();
+            console.log("Token obtenido:", token);
+
             try {
                 const data = await DonationService.getPrDonations(token);
+                console.log("Donaciones:", data);
                 setPreDonations(data);
             } catch (error) {
+                console.log("Error al obtener las donaciones:", error);
                 setError("Error al obtener las donaciones pendientes");
             } finally {
                 setLoading(false);
@@ -46,7 +52,7 @@ const Donations = () => {
         };
 
         getData();
-    }, []); // Solo se ejecuta una vez al montar el componente
+    }, []);
 
     const openModal = async (donation) => {
         setSelectedDonation(donation);
@@ -64,7 +70,7 @@ const Donations = () => {
         }
     };
     const closeModal = () => {
-        setModalVisible(false); 
+        setModalVisible(false);
     };
 
     const acceptDonation = async () => {
@@ -91,7 +97,7 @@ const Donations = () => {
 
     const cancelDonation = () => {
         console.log("Donación cancelada");
-        closeModal(); 
+        closeModal();
     };
 
     return (
@@ -110,14 +116,14 @@ const Donations = () => {
                 <Text style={styles.errorText}>{error}</Text>
             ) : (
                 <ScrollView
-                refreshControl={
-                    <RefreshControl
-                      refreshing={refreshing}
-                      onRefresh={onRefresh}
-                      colors={['#0984e3']} // Android
-                      tintColor="#0984e3"  // iOS
-                    />
-                  }>
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['#0984e3']} // Android
+                            tintColor="#0984e3"  // iOS
+                        />
+                    }>
                     <View style={styles.rowContainer}>
                         {preDonations.map((donation, index) => (
                             <View key={index} style={styles.cardWrapper}>
@@ -324,7 +330,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        
+
         borderRadius: 8,
     },
     cancelButton: {

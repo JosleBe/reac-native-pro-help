@@ -1,26 +1,27 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import {API_URL, PORT} from '@env'
+import { API_URL } from '@env'
 
 class UserService {
-    static BASE_URL = API_URL + ":" + PORT
+    static BASE_URL = API_URL
 
     static async login(email, password) {
         try {
-            const response = await axios.post(`${UserService.BASE_URL}/api/auth/login`, { email, password })
+            const url = `${UserService.BASE_URL}/api/auth/login`;
+            console.log("URL de Login:", url);
+            const response = await axios.post(url, { email, password });
             return response.data;
-
         } catch (err) {
+            console.log("Error en la solicitud:", err.message);
             throw err;
         }
     }
 
-    static async register(userData, token) {
+    static async register(userData) {
         try {
-            const response = await axios.post(`${UserService.BASE_URL}/auth/register`, userData,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+            const url = `${UserService.BASE_URL}/api/auth/register`;
+            console.log("URL de crear cuenta:", url);
+            const response = await axios.post(url, userData);
             return response.data;
         } catch (err) {
             throw err;
@@ -139,7 +140,7 @@ class UserService {
 
     static async isAuthenticated() {
         const token = await AsyncStorage.getItem('token')
-        
+
         return token == null ? false : true
     }
 

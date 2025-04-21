@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Icon, Image, Input } from 'react-native-elements';
 import UserImage from '../img/user-img.png';
 import ChatInbox from '../services/getChat';
-import {API_URL, PORT} from '@env'
+import {API_URL} from '@env'
 export default function ChatScreen() {
     const [activeChat, setActiveChat] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -48,14 +48,14 @@ export default function ChatScreen() {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const res = await axios.get(`${API_URL}:${PORT}/api/${email}/contacts`);
-                if (res.data) setContacts(res.data);
-                console.log("Contactos:", res.data);
+                const data = await ChatInbox.getContacts(email);
+                if (data) setContacts(data);
+                console.log("Contactos:", data);
             } catch (err) {
                 console.error("Error al cargar los contactos:", err);
             }
         };
-
+    
         if (email) fetchContacts();
     }, [email]);
 
@@ -89,7 +89,7 @@ export default function ChatScreen() {
 
         try {
             await addDoc(collection(db, `chats/${chatId}/messages`), message);
-            await axios.post(API_URL + ":" + PORT + "/api/send", {
+            await axios.post(API_URL + "/api/send", {
                 emisorEmail: email,
                 receptorEmail: activeChat.email,
                 texto: newMessage,

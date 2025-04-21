@@ -39,7 +39,7 @@ const ViewCampaign = ({ route, navigation }) => {
     const [isMapExpanded, setIsMapExpanded] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isUser, setIsUser] = useState(false);
-    
+
     useEffect(() => {
         Animated.loop(
             Animated.sequence([
@@ -265,7 +265,7 @@ const ViewCampaign = ({ route, navigation }) => {
                             ) : (
 
                                 <View style={{ width: '60%', alignItems: 'center', backgroundColor: 'black', padding: 10, borderRadius: 10 }}>
-                                    <Text style={{ fontSize: 14, fontWeight: 'bold', color: Colors.white, textAlign: 'center',color:'#efb810' }}>¡Inicia sesión para realizar una donación
+                                    <Text style={{ fontSize: 14, fontWeight: 'bold', color: Colors.white, textAlign: 'center', color: '#efb810' }}>¡Inicia sesión para realizar una donación
                                         o inscribirte en la campaña!
                                     </Text>
                                 </View>

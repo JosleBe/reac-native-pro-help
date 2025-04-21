@@ -6,7 +6,7 @@ import PayPalImage from '../img/PayPal.png';
 import PayIt from '../service/PayIt';
 import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL, PORT } from '@env'
+import { API_URL } from '@env'
 const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, email, phone, name, recursoTipo, articulo }) => {
 
     const [approvalUrl, setApprovalUrl] = useState(null);
@@ -21,29 +21,31 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
 
     useEffect(() => {
         const checkAuth = async () => {
-          const auth = await UserService.isAuthenticated();
-          setIsAuthenticated(auth);
+            const auth = await UserService.isAuthenticated();
+            setIsAuthenticated(auth);
         };
-    
+
         checkAuth();
-      }, []);
+    }, []);
 
     const handleDonate = async () => {
+
+        console.log('Donando...');
         if (!isAuthenticated) return;
         if (recursoTipo === "insumo") {
             const donaciones = Object.entries(selectedArticulos)
                 .filter(([_, cantidad]) => cantidad > 0)
                 .map(([nombre, cantidad]) => ({ nombre, cantidad }));
-    
+
             if (donaciones.length === 0) {
                 Alert.alert('Atención', 'Selecciona al menos un artículo para donar.');
                 return;
             }
-    
+
             try {
                 const token = await AsyncStorage.getItem('token');
-    
-                const response = await fetch(`${API_URL}:${PORT}/api/pre-donation/pre-donate`, {
+
+                const response = await fetch(`${API_URL}/api/pre-donation/pre-donate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -59,13 +61,13 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
                         name: name
                     })
                 });
-    
+
                 if (!response.ok) throw new Error("Error al procesar la donación de insumos");
-    
+
                 const updatedData = await response.json();
                 setArticulos(updatedData.articulos);
                 setSelectedArticulos({});
-    
+
                 Alert.alert('¡Gracias!', 'Donación de insumos realizada con éxito.');
                 setModalVisible(false);
             } catch (error) {
@@ -78,7 +80,7 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
                 Alert.alert('Error', 'Por favor, ingrese un monto válido');
                 return;
             }
-    
+
             Alert.alert('Confirmación', `¿Estás seguro de querer donar $${amount}?`, [
                 { text: 'Cancelar', style: 'cancel' },
                 {
@@ -89,7 +91,7 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
             ]);
         }
     };
-    
+
     const handleCantidadChange = (nombre, cantidad) => {
         setSelectedArticulos((prev) => ({
             ...prev,
@@ -190,7 +192,7 @@ const ModalDonations = ({ modalVisible, setModalVisible, userid, campaignid, ema
                                                     placeholder='Cantidad'
                                                     placeholderTextColor='gray'
                                                     keyboardType='numeric'
-                                                     value={selectedArticulos[articulo.nombre] || ""}
+                                                    value={selectedArticulos[articulo.nombre] || ""}
                                                     onChangeText={(text) => handleCantidadChange(articulo.nombre, text)}
                                                     inputContainerStyle={{
                                                         width: '100%',
@@ -346,7 +348,11 @@ const styles = StyleSheet.create({
         width: 70,
         height: 40,
         backgroundColor: Colors.white,
-        boxShadow: '0px 0px 10px 0xp rgba(0,0,0,0.1)',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,

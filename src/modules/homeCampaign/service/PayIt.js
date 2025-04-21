@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {PORT_PAYPAL, PORT} from '@env'
+import {PORT_PAYPAL} from '@env'
 import {API_URL} from '@env'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const BASE_URL = `${API_URL}:${PORT_PAYPAL}`;
@@ -60,7 +60,7 @@ const donationService = {
         try {
             const token = await AsyncStorage.getItem("token");
 
-            const response = await axios.post(`${API_URL}:${PORT}/api/donations`, payload, {
+            const response = await axios.post(`${API_URL}/api/donations`, payload, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`

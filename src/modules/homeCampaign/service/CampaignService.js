@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { API_URL, PORT } from '@env';
+import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from '../../../Kernel/config/firebase-config';
 
-const BASE_URL = `${API_URL}:${PORT}/api`;
+const BASE_URL = `${API_URL}/api`;
 
 const AdminService = {
   getAllAdmins: async (token) => {

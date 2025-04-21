@@ -11,6 +11,7 @@ import Donations from '../modules/donations/screens/Donations';
 import Login from '../modules/auth/login/Login';
 import UserService from '../modules/auth/service/AuthService';
 import Users from '../modules/users/screens/Users';
+import Profile from '../modules/profile/screens/UserProfile'
 
 const Tab = createBottomTabNavigator();
 
@@ -48,7 +49,7 @@ const TabNavigator = () => {
     otherTabs.push({
       key: 'Profile',
       name: 'Profile',
-      component: HomeCampaign,
+      component: Profile,
       label: 'Perfil',
       icon: <Icon name="person" type="material" size={30} />,
     });
